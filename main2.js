@@ -1,6 +1,7 @@
 class DrawStrokes {
-    constructor() { 
-        this.box = document.getElementById("sel_box");
+    constructor(block) { 
+        this.box = document.getElementById(block);
+        // this.box = document.getElementById("sel_box");
     }
 
     getCursorPosition(e) {
@@ -77,7 +78,7 @@ class DrawStrokes {
 
 
 
-let obj = new DrawStrokes();
+// let obj = new DrawStrokes("sel_box");
 let img = new Image();
 
 img.src = 'img/savr.jpg';
@@ -87,9 +88,19 @@ img.onload = function() {
     img1.width = img.width/2;
     img1.height = img.height/2;
     img1.src = img.src;
-    document.getElementById('pic1').appendChild(img1);
+    document.getElementById('test_box').appendChild(img1);
 }
 
+document.getElementById('crop').onclick = () => {
+    let obj = new DrawStrokes("sel_box");
+    document.body.style.cursor = "nw-resize";
+    document.onmousedown = obj.mousedown.bind(obj);
+}
 
-document.onmousedown = obj.mousedown.bind(obj);
+document.getElementById('arrow').onclick = () => {
+    let obj = new DrawStrokes("rnd_box");
+    document.body.style.cursor = "crosshair";
+    document.onmousedown = obj.mousedown.bind(obj);
+}
+
 

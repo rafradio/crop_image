@@ -1,7 +1,14 @@
 class DrawStrokes {
-    constructor(block) { 
+    constructor(block, className) { 
+        this.createElement(block, className);
         this.box = document.getElementById(block);
-        // this.box = document.getElementById("sel_box");
+    }
+
+    createElement(block, className) {
+        let newDiv = document.createElement('div');
+        newDiv.setAttribute("class", className);
+        newDiv.setAttribute("id", block);
+        document.getElementById('test_box').appendChild(newDiv);
     }
 
     getCursorPosition(e) {
@@ -18,7 +25,6 @@ class DrawStrokes {
 
     mousedown(e) {
         let mxy = this.getCursorPosition(e);
-        // var box = document.getElementById("sel_box");
         this.box.orig_x = mxy[0];
         this.box.orig_y = mxy[1];
         this.box.style.left = mxy[0]+"px";
@@ -26,14 +32,10 @@ class DrawStrokes {
         this.box.style.display = "block";
         document.onmousemove = this.mousemove.bind(this);
         document.onmouseup = this.mouseup.bind(this);
-        // document.onmouseup = () => {
-        //     this.mouseup();
-        // };
     }
 
     mousemove(e) {
         let mxy = this.getCursorPosition(e);
-        // var box = document.getElementById("sel_box");
         if(mxy[0]-this.box.orig_x < 0) {
             this.box.style.left = mxy[0]+"px";
         }
@@ -46,18 +48,36 @@ class DrawStrokes {
         this.box.style.height = Math.abs(mxy[1]-this.box.orig_y)+"px";
     }
 
+    mouseup(e) {}
+
+    removeListners() {
+        document.body.style.cursor = "auto";
+        document.onmousemove = function() {};
+        document.onmousedown = function() {};
+        document.onmouseup = function() {};
+    }
+
+    
+}
+
+class CropPicture extends DrawStrokes {
+    constructor(block, className) {
+        super(block, className);
+    }
+
     mouseup(e) {
-        // var box = document.getElementById("sel_box");
         this.drawOnCanvas(this.box.style.width, this.box.style.height, this.box.orig_x, this.box.orig_y);
         this.box.style.display = "none";
         this.box.style.width = "0";
         this.box.style.height = "0";
-        document.onmousemove = function() {};
-        document.onmouseup = function() {};
+        this.removeListners();
+        
     }
 
     drawOnCanvas(picWidth, picHeight, picX, picY) {
         let canvas = document.getElementById('myCanvas');
+        // box.classList.add("canvas-no-vis");
+        canvas.classList.remove("no-vis");
         canvas.classList.add("canvas_vis");
         let context = canvas.getContext('2d');
     
@@ -73,6 +93,20 @@ class DrawStrokes {
             context.imageSmoothingEnabled = true;
             context.drawImage(imageObj, picX*2, picY*2, desiredWidth*2, desiredHeight*2, 0, 0, canvas.width, canvas.height);
         }
+    }
+}
+
+class SelectUrgent extends DrawStrokes {
+    constructor(block, className) {
+        super(block, className);
+    }
+
+    mouseup(e) {
+        // this.drawOnCanvas(this.box.style.width, this.box.style.height, this.box.orig_x, this.box.orig_y);
+        this.box.style.display = "block";
+        // this.box.style.width = "0";
+        // this.box.style.height = "0";
+        this.removeListners();
     }
 }
 
@@ -92,15 +126,28 @@ img.onload = function() {
 }
 
 document.getElementById('crop').onclick = () => {
-    let obj = new DrawStrokes("sel_box");
     document.body.style.cursor = "nw-resize";
+    let obj = new CropPicture("sel_box", "sel_box");
     document.onmousedown = obj.mousedown.bind(obj);
 }
 
 document.getElementById('arrow').onclick = () => {
-    let obj = new DrawStrokes("rnd_box");
     document.body.style.cursor = "crosshair";
+    let obj = new SelectUrgent("rnd_box", "rnd_box");
     document.onmousedown = obj.mousedown.bind(obj);
+}
+
+document.getElementById('reset').onclick = () => {
+    canvas = document.getElementById("myCanvas");
+    canvas.classList.add("no-vis");
+    // sel_box.remove();
+    sel_box = document.getElementById("sel_box");
+    sel_box.remove();
+    rnd_box = document.getElementById("rnd_box");
+    rnd_box.remove();
+    // rnd_box.style.display = "none";
+    // rnd_box.style.width = "0";
+    // rnd_box.style.height = "0";
 }
 
 

@@ -56,8 +56,6 @@ class DrawStrokes {
         document.onmousedown = function() {};
         document.onmouseup = function() {};
     }
-
-    
 }
 
 class CropPicture extends DrawStrokes {
@@ -71,7 +69,6 @@ class CropPicture extends DrawStrokes {
         this.box.style.width = "0";
         this.box.style.height = "0";
         this.removeListners();
-        
     }
 
     drawOnCanvas(picWidth, picHeight, picX, picY) {
@@ -98,6 +95,7 @@ class CropPicture extends DrawStrokes {
 
 class SelectUrgent extends DrawStrokes {
     constructor(block, className) {
+        console.log(block);
         super(block, className);
     }
 
@@ -131,9 +129,17 @@ document.getElementById('crop').onclick = () => {
     document.onmousedown = obj.mousedown.bind(obj);
 }
 
+function createID(i) {
+    let namID = "rnd_box_" + i;
+    let block = document.getElementById(namID);
+    if (block != null) {namID = createID(i+1)}
+    return namID;
+}
+
 document.getElementById('arrow').onclick = () => {
     document.body.style.cursor = "crosshair";
-    let obj = new SelectUrgent("rnd_box", "rnd_box");
+    let id = createID(1);
+    let obj = new SelectUrgent(id, "rnd_box");
     document.onmousedown = obj.mousedown.bind(obj);
 }
 
@@ -143,7 +149,7 @@ document.getElementById('reset').onclick = () => {
     // sel_box.remove();
     sel_box = document.getElementById("sel_box");
     sel_box.remove();
-    rnd_box = document.getElementById("rnd_box");
+    rnd_box = document.getElementById("rnd_box_1");
     rnd_box.remove();
     // rnd_box.style.display = "none";
     // rnd_box.style.width = "0";

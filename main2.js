@@ -56,6 +56,7 @@ class DrawStrokes {
         document.onmousedown = function() {};
         document.onmouseup = function() {};
     }
+    findAvarageRGB(canvas) {}
 }
 
 class CropPicture extends DrawStrokes {
@@ -64,6 +65,7 @@ class CropPicture extends DrawStrokes {
     }
 
     mouseup(e) {
+        console.log("from mouseup ", this.box.style.width, this.box.style.height);
         this.drawOnCanvas(this.box.style.width, this.box.style.height, this.box.orig_x, this.box.orig_y);
         this.box.style.display = "none";
         this.box.style.width = "0";
@@ -72,6 +74,7 @@ class CropPicture extends DrawStrokes {
     }
 
     drawOnCanvas(picWidth, picHeight, picX, picY) {
+        let self = this;
         let canvas = document.getElementById('myCanvas');
         // box.classList.add("canvas-no-vis");
         canvas.classList.remove("no-vis");
@@ -85,11 +88,40 @@ class CropPicture extends DrawStrokes {
             console.log("from onload");
             canvas.style.width = picWidth;
             canvas.style.height = picHeight;
+            
+            console.log(picWidth, canvas.height);
             const desiredWidth = parseFloat(picWidth.replaceAll("px",""));
             const desiredHeight = parseFloat(picHeight.replaceAll("px",""));
+            canvas.width = desiredWidth;
+            canvas.height = desiredHeight;
             context.imageSmoothingEnabled = true;
-            context.drawImage(imageObj, picX*2, picY*2, desiredWidth*2, desiredHeight*2, 0, 0, canvas.width, canvas.height);
+            context.drawImage(imageObj, picX*2, picY*2, desiredWidth*2, desiredHeight*2, 0, 0, desiredWidth, desiredHeight);
+            console.log(self.findAvarageRGB(canvas));
         }
+    }
+
+    findAvarageRGB(canvas) {
+        let rgb = {r:0,g:0,b:0};
+        let blockSize = 5;
+        let context = canvas.getContext('2d');
+        let i = -4;
+        let count = 0;
+        let data = context.getImageData(0, 0, canvas.width, canvas.height);
+        length = data.data.length;
+
+        while ( (i += blockSize * 4) < length ) {
+            ++count;
+            rgb.r += data.data[i];
+            rgb.g += data.data[i+1];
+            rgb.b += data.data[i+2];
+        }
+
+        rgb.r = ~~(rgb.r/count);
+        rgb.g = ~~(rgb.g/count);
+        rgb.b = ~~(rgb.b/count);
+        
+        return rgb;
+
     }
 }
 
@@ -105,6 +137,15 @@ class SelectUrgent extends DrawStrokes {
         // this.box.style.width = "0";
         // this.box.style.height = "0";
         this.removeListners();
+        const canvas = document.getElementById('myCanvas');
+        const ctx = canvas.getContext("2d");
+        ctx.beginPath();
+        ctx.lineWidth = "1";
+        ctx.setLineDash([5, 3]);
+        ctx.strokeStyle = "red";
+        console.log("mouse up: ", this.box.style.width, this.box.style.height);
+        ctx.roundRect(this.box.orig_x, this.box.orig_y,  this.box.style.width.replace("px", ""), this.box.style.height.replace("px", ""), [parseFloat(this.box.style.width.replace("px", "")/2)]);
+        ctx.stroke();
     }
 }
 
@@ -154,6 +195,23 @@ document.getElementById('reset').onclick = () => {
     // rnd_box.style.display = "none";
     // rnd_box.style.width = "0";
     // rnd_box.style.height = "0";
+}
+
+document.getElementById('save').onclick = () => {
+    let canvas = document.getElementById('myCanvas');
+
+    
+    canvas.toBlob(function(blob) {
+        // после того, как Blob создан, загружаем его
+        let link = document.createElement('a');
+        link.download = 'example.png';
+
+        link.href = URL.createObjectURL(blob);
+        link.click();
+      
+        // удаляем внутреннюю ссылку на Blob, что позволит браузеру очистить память
+        URL.revokeObjectURL(link.href);
+      }, 'image/png');
 }
 
 

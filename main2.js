@@ -30,6 +30,7 @@ class DrawStrokes {
         this.box.style.left = mxy[0]+"px";
         this.box.style.top = mxy[1]+"px";
         this.box.style.display = "block";
+        this.box.style.zIndex = "8";
         document.onmousemove = this.mousemove.bind(this);
         document.onmouseup = this.mouseup.bind(this);
     }
@@ -85,7 +86,8 @@ class CropPicture extends DrawStrokes {
     
         var imageObj = new Image();
     
-        imageObj.src = document.getElementById('picture').src;
+        // imageObj.src = document.getElementById('picture').src;
+        imageObj.src = document.getElementsByTagName("img")[0].src;
         imageObj.onload = function() {
             console.log("from onload");
             canvas.style.width = picWidth;
@@ -97,18 +99,18 @@ class CropPicture extends DrawStrokes {
             canvas.width = desiredWidth;
             canvas.height = desiredHeight;
             context.imageSmoothingEnabled = true;
-            context.drawImage(imageObj, picX*3, picY*3, desiredWidth*3, desiredHeight*3, 0, 0, desiredWidth, desiredHeight);
+            context.drawImage(imageObj, picX*2, picY*2, desiredWidth*2, desiredHeight*2, 0, 0, desiredWidth, desiredHeight);
             // console.log(self.findAvarageRGB(canvas));
         }
     }
 
-    findAvarageRGB(canvas) {
+    findAvarageRGB(canvas, x, y, width, height) {
         let rgb = {r:0,g:0,b:0};
         let blockSize = 5;
         let context = canvas.getContext('2d', { willReadFrequently: true });
         let i = -4;
         let count = 0;
-        let data = context.getImageData(0, 0, canvas.width, canvas.height);
+        let data = context.getImageData(x, y, width, height);
         length = data.data.length;
 
         while ( (i += blockSize * 4) < length ) {
@@ -118,9 +120,15 @@ class CropPicture extends DrawStrokes {
             rgb.b += data.data[i+2];
         }
 
-        rgb.r = 255 - (~~(rgb.r/count));
-        rgb.g = 255 - (~~(rgb.g/count));
-        rgb.b = 255 - (~~(rgb.b/count));
+        rgb.r = (255 - (~~(rgb.r/count)));
+        rgb.g = (255 - (~~(rgb.g/count)));
+        rgb.b = (255 - (~~(rgb.b/count)));
+
+        let brightness = (299*rgb.r + 587*rgb.g + 114*rgb.b) / 1000;
+
+        rgb.r += Math.floor( brightness / 100 * 255 );
+        rgb.g += Math.floor( brightness / 100 * 255 );
+        rgb.b += Math.floor( brightness / 100 * 255 );
  
         
         return rgb;
@@ -141,17 +149,17 @@ class SelectUrgent extends DrawStrokes {
 
     mouseup(e) {
         // this.drawOnCanvas(this.box.style.width, this.box.style.height, this.box.orig_x, this.box.orig_y);
-        this.box.style.display = "block";
-        // this.box.style.width = "0";
-        // this.box.style.height = "0";
         this.drawOnCanvas();
+        this.box.style.display = "none";
+        this.box.style.width = "0";
+        this.box.style.height = "0";
         this.removeListners();
         
     }
 
     drawOnCanvas() {
         const canvas = document.getElementById('myCanvas');
-        const img = document.getElementById('picture');
+        const img = document.getElementsByTagName("img")[0];
         const ctx = canvas.getContext("2d", { willReadFrequently: true });
         ctx.beginPath();
         ctx.lineWidth = "2";
@@ -164,7 +172,9 @@ class SelectUrgent extends DrawStrokes {
 
         let roundCorners = parseFloat(Math.sqrt(Math.pow(this.box.style.width.replace("px", ""),2) + Math.pow(this.box.style.height.replace("px", ""),2))/2);
         ctx.roundRect(canvas.width - (window.innerWidth - this.box.orig_x), this.box.orig_y,  this.box.style.width.replace("px", ""), this.box.style.height.replace("px", ""), [roundCorners]);
-        // ctx.ellipse(this.box.orig_x/img.width*canvas.width, this.box.orig_y/img.height*canvas.height, roundCorners/img.height*canvas.height/3, roundCorners/img.width*canvas.width, 0, 0, Math.PI*2);
+        // let centerX = canvas.width - (window.innerWidth - this.box.orig_x) + this.box.style.width.replace("px", "")/2;
+        // let centerY = this.box.orig_y + this.box.style.height.replace("px", "")/2;
+        // ctx.ellipse(centerX, centerY, roundCorners, roundCorners, 0, 0, Math.PI*2);
         ctx.stroke();
         console.log("analyse picture: ",this.box.orig_x, this.box.orig_x/koefX,this.box.orig_y, this.box.orig_y/koefY);
     }
@@ -185,9 +195,15 @@ class SelectUrgent extends DrawStrokes {
             rgb.b += data.data[i+2];
         }
 
-        rgb.r = 255 - (~~(rgb.r/count));
-        rgb.g = 255 - (~~(rgb.g/count));
-        rgb.b = 255 - (~~(rgb.b/count));
+        rgb.r = (255 - (~~(rgb.r/count)));
+        rgb.g = (255 - (~~(rgb.g/count)));
+        rgb.b = (255 - (~~(rgb.b/count)));
+
+        let brightness = (299*rgb.r + 587*rgb.g + 114*rgb.b) / 1000;
+
+        rgb.r += Math.floor( brightness / 100 * 255 );
+        rgb.g += Math.floor( brightness / 100 * 255 );
+        rgb.b += Math.floor( brightness / 100 * 255 );
  
         
         return rgb;
@@ -200,14 +216,15 @@ class SelectUrgent extends DrawStrokes {
 // let obj = new DrawStrokes("sel_box");
 let img = new Image();
 
-img.src = 'img/step.jpg';
+img.src = 'img/yota1.jpg';
 img.onload = function() {
     console.log(img.naturalWidth, img.naturalHeight, img.width, img.height);
     let img1 = new Image();
-    img1.width = img.width/3;
-    img1.height = img.height/3;
+    img1.width = img.width/2;
+    img1.height = img.height/2;
     img1.src = img.src;
     img1.id = "picture";
+    img1.style.userSelect = "none";
     document.getElementById('test_box').appendChild(img1);
 }
 

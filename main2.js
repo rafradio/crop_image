@@ -85,7 +85,7 @@ class CropPicture extends DrawStrokes {
     
         var imageObj = new Image();
     
-        imageObj.src = 'img/savr.jpg';
+        imageObj.src = document.getElementById('picture').src;
         imageObj.onload = function() {
             console.log("from onload");
             canvas.style.width = picWidth;
@@ -97,7 +97,7 @@ class CropPicture extends DrawStrokes {
             canvas.width = desiredWidth;
             canvas.height = desiredHeight;
             context.imageSmoothingEnabled = true;
-            context.drawImage(imageObj, picX*2, picY*2, desiredWidth*2, desiredHeight*2, 0, 0, desiredWidth, desiredHeight);
+            context.drawImage(imageObj, picX*3, picY*3, desiredWidth*3, desiredHeight*3, 0, 0, desiredWidth, desiredHeight);
             // console.log(self.findAvarageRGB(canvas));
         }
     }
@@ -136,6 +136,9 @@ class SelectUrgent extends DrawStrokes {
         this.box.style.border = `2px dashed rgb(${rgb.r},${rgb.g},${rgb.b})`;
     }
 
+    // getCursorPosition(e) {
+    // }
+
     mouseup(e) {
         // this.drawOnCanvas(this.box.style.width, this.box.style.height, this.box.orig_x, this.box.orig_y);
         this.box.style.display = "block";
@@ -148,16 +151,22 @@ class SelectUrgent extends DrawStrokes {
 
     drawOnCanvas() {
         const canvas = document.getElementById('myCanvas');
+        const img = document.getElementById('picture');
         const ctx = canvas.getContext("2d", { willReadFrequently: true });
         ctx.beginPath();
         ctx.lineWidth = "2";
         ctx.setLineDash([5, 3]);
-        let rgb = this.findAvarageRGB(canvas, this.box.orig_x, this.box.orig_y,  this.box.style.width.replace("px", ""), this.box.style.height.replace("px", ""));
+        let rgb = this.findAvarageRGB(canvas,  canvas.width - (window.innerWidth - this.box.orig_x), this.box.orig_y,  this.box.style.width.replace("px", ""), this.box.style.height.replace("px", ""));
+        
         ctx.strokeStyle = `rgb(${rgb.r},${rgb.g},${rgb.b})`;
-        console.log("mouse up: ", this.box.style.width, this.box.style.height);
-        let roundCorners = parseFloat((this.box.style.width.replace("px", "") + this.box.style.height.replace("px", ""))/2);
-        ctx.roundRect(this.box.orig_x, this.box.orig_y,  this.box.style.width.replace("px", ""), this.box.style.height.replace("px", ""), [roundCorners]);
+        let koefY = img.height/canvas.height;
+        let koefX = img.width/canvas.width;
+
+        let roundCorners = parseFloat(Math.sqrt(Math.pow(this.box.style.width.replace("px", ""),2) + Math.pow(this.box.style.height.replace("px", ""),2))/2);
+        ctx.roundRect(canvas.width - (window.innerWidth - this.box.orig_x), this.box.orig_y,  this.box.style.width.replace("px", ""), this.box.style.height.replace("px", ""), [roundCorners]);
+        // ctx.ellipse(this.box.orig_x/img.width*canvas.width, this.box.orig_y/img.height*canvas.height, roundCorners/img.height*canvas.height/3, roundCorners/img.width*canvas.width, 0, 0, Math.PI*2);
         ctx.stroke();
+        console.log("analyse picture: ",this.box.orig_x, this.box.orig_x/koefX,this.box.orig_y, this.box.orig_y/koefY);
     }
 
     findAvarageRGB(canvas, x, y, width, height) {
@@ -191,13 +200,14 @@ class SelectUrgent extends DrawStrokes {
 // let obj = new DrawStrokes("sel_box");
 let img = new Image();
 
-img.src = 'img/savr.jpg';
+img.src = 'img/step.jpg';
 img.onload = function() {
     console.log(img.naturalWidth, img.naturalHeight, img.width, img.height);
     let img1 = new Image();
-    img1.width = img.width/2;
-    img1.height = img.height/2;
+    img1.width = img.width/3;
+    img1.height = img.height/3;
     img1.src = img.src;
+    img1.id = "picture";
     document.getElementById('test_box').appendChild(img1);
 }
 

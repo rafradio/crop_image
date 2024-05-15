@@ -22,7 +22,7 @@ form { margin:10px 0}
 .rnd_box {
     display: none;
     position: absolute;
-    border: 2px dashed #d02929;
+    border: 2px dashed #f4ed6c;
     border-radius: 50%;
     background: transparent;
     width: 0;

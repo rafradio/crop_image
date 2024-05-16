@@ -237,7 +237,7 @@ document.getElementById('crop').onclick = () => {
 function createID(i) {
     let namID = "rnd_box_" + i;
     let block = document.getElementById(namID);
-    if (block != null) {namID = createID(i+1)}
+    if (block != null) {return createID(i+1)}
     return namID;
 }
 

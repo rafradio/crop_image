@@ -68,8 +68,11 @@ class CropPicture extends DrawStrokes {
     }
 
     mouseup(e) {
+        [this.box.last_x, this.box.last_y] = this.getCursorPosition(e);
+        let firstCanvasX = this.box.orig_x > this.box.last_x ? this.box.last_x: this.box.orig_x;
+        let firstCanvasY = this.box.orig_y > this.box.last_y ? this.box.last_y: this.box.orig_y;
         console.log("from mouseup ", this.box.style.width, this.box.style.height);
-        this.drawOnCanvas(this.box.style.width, this.box.style.height, this.box.orig_x, this.box.orig_y);
+        this.drawOnCanvas(this.box.style.width, this.box.style.height, firstCanvasX, firstCanvasY);
         this.box.style.display = "none";
         this.box.style.width = "0";
         this.box.style.height = "0";
@@ -141,7 +144,7 @@ class SelectUrgent extends DrawStrokes {
         super(block, className);
         let canvas = document.getElementById('myCanvas');
         let rgb = this.findAvarageRGB(canvas, 0, 0, canvas.width, canvas.height);
-        this.box.style.border = `2px dashed rgb(${rgb.r},${rgb.g},${rgb.b})`;
+        // this.box.style.border = `2px dashed rgb(${rgb.r},${rgb.g},${rgb.b})`;
     }
 
     // getCursorPosition(e) {
